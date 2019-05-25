@@ -10,6 +10,22 @@ piece::piece(piece_type pt, team_color_type tct, int x, int y){
 	current_y = y;
 }
 
+team_color_type piece::get_team(){
+	return team;
+}
+
+piece_type piece::get_piece_type(){
+	return type;
+}
+
+void piece::set_team_color(team_color_type color){
+	team = color;
+}
+
+void piece::set_piece_symbol(piece_type piece){	
+	type = piece;
+}
+
 char piece::get_team_symbol(){
 	switch (team){
 		case team_color_type::black: return 'B';

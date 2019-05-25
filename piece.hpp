@@ -2,6 +2,7 @@
 #define PIECE_DEF
 #include <string>
 #include <cassert>
+#include <iostream>
 
 enum class piece_type {
 	none,
@@ -28,8 +29,11 @@ class piece {
 		piece();
 		piece(piece_type, team_color_type, int, int);
 		//move(int, int);
-		piece_type get_type();
 		char get_team_symbol(); // for printing/debugging
 		char get_piece_symbol(); // for printing/debugging
+		void set_team_color(team_color_type color);
+		void set_piece_symbol(piece_type piece);
+		team_color_type get_team();
+		piece_type get_piece_type();
 };
 #endif

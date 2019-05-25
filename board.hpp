@@ -12,5 +12,8 @@ class board {
 		board();
 		void init();
 		void print(); //for initial debugging
+		void set_piece(int y,int x,int y_new,int x_new);
+		piece get_piece(int y,int x);
+		void set_gift(int y,int x);
 };
 #endif

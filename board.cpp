@@ -31,6 +31,20 @@ void board::init(){
 
 
 }
+void board::set_piece(int y,int x,int y_new,int x_new){
+	//std::cout<<y<<x<<y_new<<x_new<<std::endl;
+	cord[y_new][x_new] = cord[y][x];
+	cord[y][x].set_piece_symbol(piece_type::none);
+	cord[y][x].set_team_color(team_color_type::none);
+}
+
+void board::set_gift(int y,int x){
+	cord[y][x].set_piece_symbol(piece_type::gift);
+	cord[y][x].set_team_color(team_color_type::none);
+}
+piece board::get_piece(int y,int x){
+	return cord[y][x];
+}
 
 void board::print(){
 	for (int j = 0; j != 7; j++){
