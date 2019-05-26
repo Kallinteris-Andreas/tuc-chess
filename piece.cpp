@@ -3,11 +3,9 @@
 piece::piece(){
 }
 
-piece::piece(piece_type pt, team_color_type tct, int x, int y){
+piece::piece(piece_type pt, team_color_type tct){
 	type = pt;
 	team = tct;
-	current_x = x;
-	current_y = y;
 }
 
 team_color_type piece::get_team(){

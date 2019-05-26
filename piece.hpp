@@ -22,12 +22,9 @@ class piece {
 	private:
 		piece_type type;
 		team_color_type team;
-
-		int current_x;
-		int current_y;
 	public:
 		piece();
-		piece(piece_type, team_color_type, int, int);
+		piece(piece_type, team_color_type);
 		//move(int, int);
 		char get_team_symbol(); // for printing/debugging
 		char get_piece_symbol(); // for printing/debugging
