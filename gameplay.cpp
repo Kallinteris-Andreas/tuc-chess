@@ -15,13 +15,12 @@ gameplay::gameplay(){
 		cout<<"ERROR in malloc, try reducing the size of BOARD_COUNT variable from gameplay.hpp"<<endl;
 		exit(1);
 	}
-	cout<<sizeof(possible_boards[BOARD_COUNT-1])<<endl;
-	cout<<sizeof(chess_board)<<endl;
 }
 void gameplay::min_max_Decision(board current_board){
 	possible_boards_counter = 0;
 
 	calculate_moves(current_board,color);
+
 	int cur_actions[30][4];
 	int board_scores[30];
 	memcpy(cur_actions,actions,sizeof(actions));
@@ -35,14 +34,17 @@ void gameplay::min_max_Decision(board current_board){
 		board_scores[i] = possible_boards[possible_boards_counter]
 											.set_piece(actions[i][0],actions[i][1],actions[i][2],actions[i][3]);
 		possible_boards_counter++;
+		cout<<"board_scores[i]: "<<board_scores[i]<<endl;
 	}	
 
 	int current_score = our_score - enemy_score;
 	int score = 0;
 	int max_score =-MAX_INT;
 	int best_action_index = -1;
+
 	for(int i=0;i<cur_actions_size;i++){
-		score = min_value(possible_boards[i],current_score + board_scores[i]);
+		score = min_value(possible_boards[i],current_score + board_scores[i],1);
+		cout<<"Final scores are:"<<score<<endl;
 		if(score >= max_score){
 			max_score = score;
 			best_action_index = i;
@@ -58,18 +60,19 @@ void gameplay::min_max_Decision(board current_board){
 
 }
 
-int gameplay::min_value(board current_board,int current_score){
+int gameplay::min_value(board current_board,int current_score,int depth){
 
 	int board_scores[30];
 
-	if(action_depth>=4){
+	if(depth>=MAX_DEPTH){
+		//cout<<"Reached max depth"<<endl;
 		return current_score ;//Score of current board
 	}
 
 	int min_score = MAX_INT;
-	cout<<"---------------Min moves , Board number: "<<possible_boards_counter<< endl;
+	cout<<"---------------Min moves , Board number: "<<possible_boards_counter<<" ,depth: "<<depth<< endl;
 	current_board.print();
-	cout<<"---------------"<<endl;
+	cout<<"---------------Score:"<<current_score<<endl;
 
 	if((BOARD_COUNT - possible_boards_counter)<15){
 		cout<<"Reached memory limit, stop expanding this tree(/debug/ without calculating moves!!)"<<endl;
@@ -77,43 +80,53 @@ int gameplay::min_value(board current_board,int current_score){
 	}
 
 	calculate_moves(current_board,opponent_team_color);
-
+	cout<<actions_size<<endl;
 	if((BOARD_COUNT - possible_boards_counter)<actions_size){
 		cout<<"Reached memory limit, stop expanding this tree"<<endl;
 		return current_score; //Score of current board
+	}
+	if(actions_size == 0){
+		cout<<"No more possible moves"<<endl;
+		return current_score;
 	}
 
 	for(int i=0;i<actions_size;i++){
 		cout<<actions[i][0]<<actions[i][1]<<actions[i][2]<<actions[i][3]<<endl ;
 		// Create all possible new boards
+		//cout<<possible_boards_counter<<endl;
 		possible_boards[possible_boards_counter] = current_board; //may need memcpy
+		//cout<<possible_boards_counter<<endl;
 		board_scores[i] = -possible_boards[possible_boards_counter]
 							.set_piece(actions[i][0],actions[i][1],actions[i][2],actions[i][3]);
 		possible_boards_counter++;
 	}
 
 	int score = 0;
+	int counter = 0;;
 	int tmp = possible_boards_counter;
 
 	for(int i=possible_boards_counter - actions_size;i<tmp;i++){
 		score = max_value(possible_boards[i],
-							board_scores[i - possible_boards_counter - actions_size ]+current_score);
-		if(score <= min_score){
+							board_scores[counter]+current_score,depth+1);
+		cout<<"Minimizer depth: "<<depth<<" ,Scores: "<<score<<endl;
+		counter++;
+		if(score < min_score){
 			min_score = score;
 
 		}
 	}
 	return min_score;
 }
-int gameplay::max_value(board current_board,int current_score){
+int gameplay::max_value(board current_board,int current_score,int depth){
 
 	int board_scores[30];
 
-	cout<<"------------------max_value, Board number: "<<possible_boards_counter<<endl;
+	cout<<"------------------max_value, Board number: "<<possible_boards_counter<<" ,depth: "<<depth<< endl;
 	current_board.print();
-	cout<<"---------------"<<endl;
+	cout<<"---------------Score:"<<current_score<<endl;
 
-	if(action_depth>=4){
+	if(depth>=MAX_DEPTH){
+		//cout<<"Reached max depth"<<endl;
 		return current_score;//Score of current board
 	}
 
@@ -123,15 +136,20 @@ int gameplay::max_value(board current_board,int current_score){
 	}
 
 	calculate_moves(current_board,color);
-
+	cout<<actions_size<<endl;
 	if((BOARD_COUNT - possible_boards_counter)<actions_size){
 		cout<<"Reached memory limit, stop expanding this tree"<<endl;
 		return current_score; //Score of current board
 	}
 
+	if(actions_size == 0){
+		cout<<"No more possible moves"<<endl;
+		return current_score;
+	}
 	for(int i=0;i<actions_size;i++){
 		cout<<actions[i][0]<<actions[i][1]<<actions[i][2]<<actions[i][3]<<endl ;
 		// Create all possible new boards
+		//cout<<possible_boards_counter<<"  "<<actions_size<<endl;
 		possible_boards[possible_boards_counter] = current_board; //may need memcpy
 		board_scores[i] = possible_boards[possible_boards_counter]
 										.set_piece(actions[i][0],actions[i][1],actions[i][2],actions[i][3]);
@@ -139,12 +157,15 @@ int gameplay::max_value(board current_board,int current_score){
 	}
 
 	int score = 0;
+	int counter = 0;
 	int tmp = possible_boards_counter;
 
 	int max_score = -MAX_INT;
 	for(int i=possible_boards_counter - actions_size;i<tmp;i++){
 		score = min_value(possible_boards[i],
-									board_scores[i - possible_boards_counter - actions_size ]+current_score);
+							board_scores[counter]+current_score,depth+1);
+		cout<<"Maximizer depth: "<<depth<<" ,Scores: "<<score<<endl;
+		counter++;
 		if(score >= max_score){
 			max_score = score;
 		}
@@ -224,7 +245,8 @@ void gameplay::connect_and_play(){
 
 
 				cout<<our_score<<"---"<<enemy_score<<endl;
-				cout<<"----ROOT BOARD----"<<endl;
+				cout<<"----ROOT BOARD----=========================================================="<<endl;
+				cout<<"============================================================================"<<endl;
 				chess_board.print();
 				cout<<endl;
 
@@ -232,6 +254,8 @@ void gameplay::connect_and_play(){
 				if((buffer[1] == '0' && color == team_color_type::white) ||
 									(buffer[1] == '1' && color == team_color_type::black)){
 					std::cout<<"Calculating our move"<<endl;
+					// int i;
+					// cin>>i;
 					min_max_Decision(chess_board);
 
 					sendto(sockfd,send_buffer,sizeof(send_buffer),0,(struct sockaddr *)&serv,m);
@@ -290,11 +314,16 @@ void gameplay::calculate_moves(board current_board,team_color_type color){
 	}
 	actions_size = 0;
 
+	bool our_king_exists = false;
+	bool enemy_king_exists = false;
+	bool any_pawn_exists = false;
+
 	for (int j = 0; j != 7; j++){
 		for (int i = 0 ; i != 5; i++){
 			cur_piece = current_board.get_piece(j,i);
 			if(cur_piece.get_team() == color ){
 				if(cur_piece.get_piece_type() == piece_type::pawn){
+					any_pawn_exists = true;
 					//Calculate all available pawn moves
 
 					if(color == team_color_type::white){
@@ -328,6 +357,7 @@ void gameplay::calculate_moves(board current_board,team_color_type color){
 					}
 
 				}else if(cur_piece.get_piece_type() == piece_type::rook){
+					any_pawn_exists = true;
 					//Calculate all available rook moves
 
 					//up
@@ -348,6 +378,7 @@ void gameplay::calculate_moves(board current_board,team_color_type color){
 							break;
 						}
 					}
+					after:
 					//down
 					for(int b=1;b<=3;b++){
 						if(j+b<=6){
@@ -356,8 +387,8 @@ void gameplay::calculate_moves(board current_board,team_color_type color){
 								break;
 							}else if(current_board.get_piece(j+b,i).get_team() == color){
 								break;
-							}else if(current_board.get_piece(j-b,i).get_piece_type() == piece_type::gift){
-								add_action(j,i,j-b,i);
+							}else if(current_board.get_piece(j+b,i).get_piece_type() == piece_type::gift){
+								add_action(j,i,j+b,i);
 								break;
 							}else{
 								add_action(j,i,j+b,i);
@@ -374,8 +405,8 @@ void gameplay::calculate_moves(board current_board,team_color_type color){
 								break;
 							}else if(current_board.get_piece(j,i-b).get_team() == color){
 								break;
-							}else if(current_board.get_piece(j-b,i).get_piece_type() == piece_type::gift){
-								add_action(j,i,j-b,i);
+							}else if(current_board.get_piece(j,i-b).get_piece_type() == piece_type::gift){
+								add_action(j,i,j,i-b);
 								break;
 							}else{
 								add_action(j,i,j,i-b);
@@ -392,8 +423,8 @@ void gameplay::calculate_moves(board current_board,team_color_type color){
 								break;
 							}else if(current_board.get_piece(j,i+b).get_team() == color){
 								break;
-							}else if(current_board.get_piece(j-b,i).get_piece_type() == piece_type::gift){
-								add_action(j,i,j-b,i);
+							}else if(current_board.get_piece(j,i+b).get_piece_type() == piece_type::gift){
+								add_action(j,i,j,i+b);
 								break;
 							}else{
 								add_action(j,i,j,i+b);
@@ -404,6 +435,7 @@ void gameplay::calculate_moves(board current_board,team_color_type color){
 					}						
 
 				}else if(cur_piece.get_piece_type() == piece_type::king){
+					our_king_exists = true;
 					//Calculate all available king moves
 					//down
 					if(j+1<=6){
@@ -432,7 +464,18 @@ void gameplay::calculate_moves(board current_board,team_color_type color){
 				}else{
 					assert(0);
 				}
+			}else if(cur_piece.get_team() == opponent_color ){
+				if(cur_piece.get_piece_type() == piece_type::king){
+					enemy_king_exists = true;
+				}else if (cur_piece.get_piece_type() == piece_type::pawn 
+														|| cur_piece.get_piece_type() == piece_type::rook){
+					any_pawn_exists = true;
+				}
 			}
 		}
 	}
+	if(!(enemy_king_exists && our_king_exists && any_pawn_exists )){
+		actions_size = 0;
+	}
 }
+

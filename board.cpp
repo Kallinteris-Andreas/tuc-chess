@@ -86,7 +86,7 @@ int board::set_piece(int y,int x,int y_new,int x_new){
 		int score = 0;
 		switch(cord[y_new][x_new].get_piece_type()){
 			case(piece_type::pawn):
-				score = 1;
+				score = 2;
 				break;
 			case(piece_type::rook):
 				score = 3;
