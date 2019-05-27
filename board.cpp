@@ -83,16 +83,19 @@ int board::set_piece(int y,int x,int y_new,int x_new){
 		cord[y_new][x_new].set_team_color(team_color_type::none);
 		return 1;
 	}else{
+		//CHANGES TBM-> IF KING IS THREATENED KILL,AVOID!!!
+		//IF LOSING SCORE = -1 ELSE = 0
+		// SORT MOVES BY IMPORTANTCY
 		int score = 0;
 		switch(cord[y_new][x_new].get_piece_type()){
 			case(piece_type::pawn):
-				score = 2;
+				score = 1*3;
 				break;
 			case(piece_type::rook):
-				score = 3;
+				score = 3*3;
 				break;
 			case(piece_type::king):
-				score = 8;
+				score = 8*10;
 				break;
 			case(piece_type::gift): ///MAY CHANGE THIS TO RANDOM
 				score = 1;

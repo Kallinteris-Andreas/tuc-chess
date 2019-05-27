@@ -21,6 +21,9 @@ void gameplay::min_max_Decision(board current_board){
 
 	calculate_moves(current_board,color);
 
+	int a = -MAX_INT;
+	int b = MAX_INT;
+
 	int cur_actions[30][4];
 	int board_scores[30];
 	memcpy(cur_actions,actions,sizeof(actions));
@@ -34,7 +37,6 @@ void gameplay::min_max_Decision(board current_board){
 		board_scores[i] = possible_boards[possible_boards_counter]
 											.set_piece(actions[i][0],actions[i][1],actions[i][2],actions[i][3]);
 		possible_boards_counter++;
-		cout<<"board_scores[i]: "<<board_scores[i]<<endl;
 	}	
 
 	int current_score = our_score - enemy_score;
@@ -43,7 +45,7 @@ void gameplay::min_max_Decision(board current_board){
 	int best_action_index = -1;
 
 	for(int i=0;i<cur_actions_size;i++){
-		score = min_value(possible_boards[i],current_score + board_scores[i],1);
+		score = min_value(possible_boards[i],current_score + board_scores[i],1,a,b);
 		cout<<"Final scores are:"<<score<<endl;
 		if(score >= max_score){
 			max_score = score;
@@ -60,38 +62,40 @@ void gameplay::min_max_Decision(board current_board){
 
 }
 
-int gameplay::min_value(board current_board,int current_score,int depth){
+int gameplay::min_value(board current_board,int current_score,int depth,int aa,int bb){
 
 	int board_scores[30];
+	int a = aa;
+	int b = bb;
 
 	if(depth>=MAX_DEPTH){
 		//cout<<"Reached max depth"<<endl;
 		return current_score ;//Score of current board
 	}
 
-	int min_score = MAX_INT;
-	cout<<"---------------Min moves , Board number: "<<possible_boards_counter<<" ,depth: "<<depth<< endl;
-	current_board.print();
-	cout<<"---------------Score:"<<current_score<<endl;
+	// cout<<"---------------Min moves , Board number: "<<possible_boards_counter<<" ,depth: "<<depth<< endl;
+	// current_board.print();
+	// cout<<"---------------Score:"<<current_score<<endl;
 
 	if((BOARD_COUNT - possible_boards_counter)<15){
+		debug_reached_mem_limit = true;
 		cout<<"Reached memory limit, stop expanding this tree(/debug/ without calculating moves!!)"<<endl;
 		return current_score; //Score of current board
 	}
 
 	calculate_moves(current_board,opponent_team_color);
-	cout<<actions_size<<endl;
+	//cout<<actions_size<<endl;
 	if((BOARD_COUNT - possible_boards_counter)<actions_size){
 		cout<<"Reached memory limit, stop expanding this tree"<<endl;
 		return current_score; //Score of current board
 	}
 	if(actions_size == 0){
-		cout<<"No more possible moves"<<endl;
+		//cout<<"No more possible moves"<<endl;
 		return current_score;
 	}
 
 	for(int i=0;i<actions_size;i++){
-		cout<<actions[i][0]<<actions[i][1]<<actions[i][2]<<actions[i][3]<<endl ;
+		//cout<<actions[i][0]<<actions[i][1]<<actions[i][2]<<actions[i][3]<<endl ;
 		// Create all possible new boards
 		//cout<<possible_boards_counter<<endl;
 		possible_boards[possible_boards_counter] = current_board; //may need memcpy
@@ -99,31 +103,45 @@ int gameplay::min_value(board current_board,int current_score,int depth){
 		board_scores[i] = -possible_boards[possible_boards_counter]
 							.set_piece(actions[i][0],actions[i][1],actions[i][2],actions[i][3]);
 		possible_boards_counter++;
+		if (possible_boards_counter >= debug_max_boards_used){
+			debug_max_boards_used = possible_boards_counter;
+		}
 	}
 
+	int min_score = MAX_INT;
 	int score = 0;
 	int counter = 0;;
 	int tmp = possible_boards_counter;
 
 	for(int i=possible_boards_counter - actions_size;i<tmp;i++){
 		score = max_value(possible_boards[i],
-							board_scores[counter]+current_score,depth+1);
-		cout<<"Minimizer depth: "<<depth<<" ,Scores: "<<score<<endl;
+							board_scores[counter]+current_score,depth+1,a,b);
+		//cout<<"Minimizer depth: "<<depth<<" ,Scores: "<<score<<endl;
 		counter++;
 		if(score < min_score){
 			min_score = score;
-
+		}
+		if(A_B_PRUNNING){
+			if(score <= a ){
+				return min_score;
+			}
+			if(b>score){
+				b = score;
+			}			
 		}
 	}
 	return min_score;
 }
-int gameplay::max_value(board current_board,int current_score,int depth){
+
+int gameplay::max_value(board current_board,int current_score,int depth,int aa,int bb){
 
 	int board_scores[30];
+	int a = aa;
+	int b = bb;
 
-	cout<<"------------------max_value, Board number: "<<possible_boards_counter<<" ,depth: "<<depth<< endl;
-	current_board.print();
-	cout<<"---------------Score:"<<current_score<<endl;
+	// cout<<"------------------max_value, Board number: "<<possible_boards_counter<<" ,depth: "<<depth<< endl;
+	// current_board.print();
+	// cout<<"---------------Score:"<<current_score<<endl;
 
 	if(depth>=MAX_DEPTH){
 		//cout<<"Reached max depth"<<endl;
@@ -131,29 +149,32 @@ int gameplay::max_value(board current_board,int current_score,int depth){
 	}
 
 	if((BOARD_COUNT - possible_boards_counter)<15){
+		debug_reached_mem_limit = true;
 		cout<<"Reached memory limit, stop expanding this tree(/debug/ without calculating moves!!)"<<endl;
 		return current_score; //Score of current board
 	}
 
 	calculate_moves(current_board,color);
-	cout<<actions_size<<endl;
+	//cout<<actions_size<<endl;
 	if((BOARD_COUNT - possible_boards_counter)<actions_size){
 		cout<<"Reached memory limit, stop expanding this tree"<<endl;
 		return current_score; //Score of current board
 	}
 
 	if(actions_size == 0){
-		cout<<"No more possible moves"<<endl;
+		//cout<<"No more possible moves"<<endl;
 		return current_score;
 	}
 	for(int i=0;i<actions_size;i++){
-		cout<<actions[i][0]<<actions[i][1]<<actions[i][2]<<actions[i][3]<<endl ;
+		//cout<<actions[i][0]<<actions[i][1]<<actions[i][2]<<actions[i][3]<<endl ;
 		// Create all possible new boards
-		//cout<<possible_boards_counter<<"  "<<actions_size<<endl;
 		possible_boards[possible_boards_counter] = current_board; //may need memcpy
 		board_scores[i] = possible_boards[possible_boards_counter]
 										.set_piece(actions[i][0],actions[i][1],actions[i][2],actions[i][3]);
 		possible_boards_counter++;
+		if (possible_boards_counter >= debug_max_boards_used){
+			debug_max_boards_used = possible_boards_counter;
+		}
 	}
 
 	int score = 0;
@@ -163,13 +184,23 @@ int gameplay::max_value(board current_board,int current_score,int depth){
 	int max_score = -MAX_INT;
 	for(int i=possible_boards_counter - actions_size;i<tmp;i++){
 		score = min_value(possible_boards[i],
-							board_scores[counter]+current_score,depth+1);
-		cout<<"Maximizer depth: "<<depth<<" ,Scores: "<<score<<endl;
+							board_scores[counter]+current_score,depth+1,a,b);
+		//cout<<"Maximizer depth: "<<depth<<" ,Scores: "<<score<<endl;
 		counter++;
-		if(score >= max_score){
+		if(score > max_score){
 			max_score = score;
 		}
+		if(A_B_PRUNNING){
+			if(score >= b ){
+				return max_score;
+			}
+			if(a <score){
+				a = score;
+			}
+		}
+		
 	}
+
 	return max_score;
 }
 
@@ -245,8 +276,8 @@ void gameplay::connect_and_play(){
 
 
 				cout<<our_score<<"---"<<enemy_score<<endl;
-				cout<<"----ROOT BOARD----=========================================================="<<endl;
-				cout<<"============================================================================"<<endl;
+				cout<<"----ROOT BOARD----============================="<<endl;
+				cout<<"==============================================="<<endl;
 				chess_board.print();
 				cout<<endl;
 
@@ -256,7 +287,21 @@ void gameplay::connect_and_play(){
 					std::cout<<"Calculating our move"<<endl;
 					// int i;
 					// cin>>i;
+
+					time_t start,end;
+					time (&start);	
+
 					min_max_Decision(chess_board);
+
+					time (&end);
+					double dif = difftime (end,start);
+					if(dif >debug_max_move_time){
+						debug_max_move_time = dif;
+					}
+					debug_sum_move_time +=dif;
+					debug_count_move ++;
+
+					printf ("Elasped time is %.2lf seconds.", dif );
 
 					sendto(sockfd,send_buffer,sizeof(send_buffer),0,(struct sockaddr *)&serv,m);
 				}else{
@@ -281,8 +326,32 @@ void gameplay::connect_and_play(){
 					continue;
 				}
 			}else if((buffer[0] == 'G' && buffer[1] == 'E')){
+
+				cout<<"\nReached mem limit: "<<debug_reached_mem_limit<<endl;
+				cout<<"Max move time : "<<debug_max_move_time<<endl;
+				cout<<"Average move time : "<<debug_sum_move_time/debug_count_move<<endl;
+				cout<<"total moves : "<<debug_count_move<<endl;
+				cout<<"Max boards used : "<<debug_max_boards_used<<endl;
+
+				if(color == team_color_type::white){
+					our_score = (buffer[2]-48)*10 + (buffer[3]-48);
+					enemy_score = (buffer[4]-48)*10 + (buffer[5]-48);
+				}else{
+					our_score = (buffer[4]-48)*10 + (buffer[5]-48);
+					enemy_score = (buffer[2]-48)*10 + (buffer[3]-48);
+				}
+
+
+				if(our_score > enemy_score){
+					cout<<"You Win!!!"<<endl;
+				}else if(our_score <enemy_score){
+					cout<<"You Lose..."<<endl;
+				}else{
+					cout<<"..Draw.."<<endl;
+				}
 				free(possible_boards);
-				std::cout<<"Game Over !!!"<<endl;
+
+				exit(0);
 			}else{
 				std::cout<<"Wrong message format!!!!\n Exiting..."<<endl;
 				exit(1);
