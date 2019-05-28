@@ -17,7 +17,7 @@
 
 #define MAX_INT 2147483
 #define BOARD_COUNT 10000000
-#define MAX_DEPTH 9
+#define MAX_DEPTH 10
 
 #define A_B_PRUNNING true
 
@@ -45,6 +45,7 @@ class gameplay{
 		double debug_sum_move_time = 0;
 		double debug_count_move = 0;
 		int debug_max_boards_used = 0;
+		int debug_prunned_boards= 0;
 		int debug_max_actions= 0;
 
 		void calculate_moves(board current_board,team_color_type color);
