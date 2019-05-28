@@ -4,6 +4,11 @@
 #include <iostream>
 #include "piece.hpp"
 
+#define KING_MULT 10
+#define ROOK_MULT 3
+#define PAWN_MULT 4
+#define GIFT_MULT 2
+
 //this is a class for the chess board
 class board {
 	private:

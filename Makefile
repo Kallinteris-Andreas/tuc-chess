@@ -30,6 +30,3 @@ cr:
 	./program
 
 
-# Notes:
-# 	Set_piece returns score change!!!
-# 	may need to create one more parallel array for each boards score OR PASS IT AS  argument !!(good idea)

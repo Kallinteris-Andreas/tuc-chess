@@ -68,46 +68,45 @@ void board::init(){
 
 int board::set_piece(int y,int x,int y_new,int x_new){
 	//std::cout<<y<<x<<y_new<<x_new<<std::endl;
+
+	int score = 0;
+	switch(cord[y_new][x_new].get_piece_type()){
+		case(piece_type::pawn):
+			score = 1*PAWN_MULT;
+			break;
+		case(piece_type::rook):
+			score = 3*ROOK_MULT;
+			break;
+		case(piece_type::king):
+			score = 8*KING_MULT;
+			break;
+		case(piece_type::gift): ///MAY CHANGE THIS TO RANDOM
+			score = 1*GIFT_MULT;
+			break;
+		default:
+			break;
+	}
 	if(cord[y][x].get_team() == team_color_type::white && cord[y][x].get_piece_type() == piece_type::pawn 
 																							&& y_new == 0){
 		cord[y][x].set_piece_symbol(piece_type::none);
 		cord[y][x].set_team_color(team_color_type::none);
 		cord[y_new][x_new].set_piece_symbol(piece_type::none);
 		cord[y_new][x_new].set_team_color(team_color_type::none);
-		return 1;
+		return  score + 2;
 	}else if(cord[y][x].get_team() == team_color_type::black && cord[y][x].get_piece_type() == piece_type::pawn 
 																							&& y_new == 6){
 		cord[y][x].set_piece_symbol(piece_type::none);
 		cord[y][x].set_team_color(team_color_type::none);
 		cord[y_new][x_new].set_piece_symbol(piece_type::none);
 		cord[y_new][x_new].set_team_color(team_color_type::none);
-		return 1;
+		return  score + 2;
 	}else{
-		//CHANGES TBM-> IF KING IS THREATENED KILL,AVOID!!!
-		//IF LOSING SCORE = -1 ELSE = 0
-		// SORT MOVES BY IMPORTANTCY
-		int score = 0;
-		switch(cord[y_new][x_new].get_piece_type()){
-			case(piece_type::pawn):
-				score = 1*3;
-				break;
-			case(piece_type::rook):
-				score = 3*3;
-				break;
-			case(piece_type::king):
-				score = 8*10;
-				break;
-			case(piece_type::gift): ///MAY CHANGE THIS TO RANDOM
-				score = 1;
-				break;
-			default:
-				break;
-		}
 		cord[y_new][x_new] = cord[y][x];
 		cord[y][x].set_piece_symbol(piece_type::none);
 		cord[y][x].set_team_color(team_color_type::none);
-		return score;
 	}
+
+	return score;
 }
 
 void board::set_gift(int y,int x){
