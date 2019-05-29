@@ -17,7 +17,7 @@
 
 #define MAX_INT 2147483
 #define BOARD_COUNT 10000000
-#define MAX_DEPTH 9
+#define MAX_DEPTH 8
 
 #define A_B_PRUNNING true
 

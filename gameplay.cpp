@@ -48,9 +48,16 @@ void gameplay::min_max_Decision(board current_board){
 		tmp_score = get_real_score(board_scores[i]);
 		score = min_value(possible_boards[i],current_score + board_scores[i],current_score + tmp_score,1,a,b);
 		cout<<"Final scores are:"<<score<<endl;
-		if(score > max_score){
-			max_score = score;
-			best_action_index = i;
+		if(current_score>0){
+			if(score >= max_score){
+				max_score = score;
+				best_action_index = i;
+			}
+		}else{
+			if(score > max_score){
+				max_score = score;
+				best_action_index = i;
+			}
 		}
 	}
 
