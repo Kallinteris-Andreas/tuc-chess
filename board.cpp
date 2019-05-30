@@ -80,7 +80,7 @@ int board::set_piece(int y,int x,int y_new,int x_new){
 		case(piece_type::king):
 			score = 8*KING_MULT;
 			break;
-		case(piece_type::gift): ///MAY CHANGE THIS TO RANDOM
+		case(piece_type::gift): 
 			score = 1*GIFT_MULT;
 			break;
 		default:

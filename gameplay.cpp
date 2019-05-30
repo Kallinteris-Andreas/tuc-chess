@@ -17,7 +17,7 @@ gameplay::gameplay(){
 	}
 }
 void gameplay::min_max_Decision(board current_board){
-	possible_boards_counter = 0;
+	
 
 	calculate_moves(current_board,color);
 
@@ -33,7 +33,7 @@ void gameplay::min_max_Decision(board current_board){
 	for(int i=0;i<actions_size;i++){
 		cout<<actions[i][0]<<actions[i][1]<<actions[i][2]<<actions[i][3]<<endl ;
 		//Generate all possible boards
-		possible_boards[possible_boards_counter] = current_board; //may need memcpy
+		possible_boards[possible_boards_counter] = current_board; 
 		board_scores[i] = possible_boards[possible_boards_counter]
 											.set_piece(actions[i][0],actions[i][1],actions[i][2],actions[i][3]);
 		possible_boards_counter++;
@@ -43,10 +43,15 @@ void gameplay::min_max_Decision(board current_board){
 	int score = 0;int tmp_score = 0;
 	int max_score =-MAX_INT;
 	int best_action_index = -1;
+	board tmp_board;
 
 	for(int i=0;i<cur_actions_size;i++){
-		tmp_score = get_real_score(board_scores[i]);
-		score = min_value(possible_boards[i],current_score + board_scores[i],current_score + tmp_score,1,a,b);
+		possible_boards_counter = 0;
+		tmp_board = current_board;
+		score = tmp_board.set_piece(cur_actions[i][0],cur_actions[i][1],cur_actions[i][2],cur_actions[i][3]);
+
+		tmp_score = get_real_score(score);
+		score = min_value(tmp_board,current_score + score,current_score + tmp_score,1,a,b);
 		cout<<"Final scores are:"<<score<<endl;
 		if(current_score>0){
 			if(score >= max_score){
