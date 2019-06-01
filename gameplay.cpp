@@ -5,7 +5,6 @@ gameplay::gameplay(){
 	srand(0);
 	chess_board = board();
 	chess_board.init();
-	chess_board.print();
 	color = team_color_type::none;
 	our_score = 0;
 	enemy_score = 0;
@@ -29,9 +28,9 @@ void gameplay::min_max_Decision(board current_board){
 	memcpy(cur_actions,actions,sizeof(actions));
 	int cur_actions_size = actions_size;	
 
-	cout<<"---------"<<endl;
+	//cout<<"---------"<<endl;
 	for(int i=0;i<actions_size;i++){
-		cout<<actions[i][0]<<actions[i][1]<<actions[i][2]<<actions[i][3]<<endl ;
+		//cout<<actions[i][0]<<actions[i][1]<<actions[i][2]<<actions[i][3]<<endl ;
 		//Generate all possible boards
 		possible_boards[possible_boards_counter] = current_board; 
 		board_scores[i] = possible_boards[possible_boards_counter]
@@ -52,7 +51,7 @@ void gameplay::min_max_Decision(board current_board){
 
 		tmp_score = get_real_score(score);
 		score = min_value(tmp_board,current_score + score,current_score + tmp_score,1,a,b);
-		cout<<"Final scores are:"<<score<<endl;
+		//cout<<"Final scores are:"<<score<<endl;
 		if(current_score>0){
 			if(score >= max_score){
 				max_score = score;
@@ -71,7 +70,7 @@ void gameplay::min_max_Decision(board current_board){
 	send_buffer[2] = (cur_actions[best_action_index][2]+48);
 	send_buffer[3] = (cur_actions[best_action_index][3]+48);
 
-	cout<<"Best move is: "<<send_buffer[0]<<send_buffer[1]<<send_buffer[2]<<send_buffer[3]<<endl;
+	//cout<<"Best move is: "<<send_buffer[0]<<send_buffer[1]<<send_buffer[2]<<send_buffer[3]<<endl;
 
 }
 
@@ -112,16 +111,16 @@ int gameplay::min_value(board current_board,int current_score,int real_score,int
 	// current_board.print();
 	// cout<<"---------------Score:"<<current_score<<endl;
 
-	if((BOARD_COUNT - possible_boards_counter)<15){
+	if((BOARD_COUNT - possible_boards_counter)<25){
 		debug_reached_mem_limit = true;
-		cout<<"Reached memory limit, stop expanding this tree(/debug/ without calculating moves!!)"<<endl;
+		//cout<<"Reached memory limit, stop expanding this tree(/debug/ without calculating moves!!)"<<endl;
 		return current_score; //Score of current board
 	}
 
 	calculate_moves(current_board,opponent_team_color);
 
 	if((BOARD_COUNT - possible_boards_counter)<actions_size){
-		cout<<"Reached memory limit, stop expanding this tree"<<endl;
+		//cout<<"Reached memory limit, stop expanding this tree"<<endl;
 		return current_score; //Score of current board
 	}
 	if(actions_size == 0){
@@ -186,16 +185,16 @@ int gameplay::max_value(board current_board,int current_score,int real_score,int
 		return current_score;//Score of current board
 	}
 
-	if((BOARD_COUNT - possible_boards_counter)<15){
+	if((BOARD_COUNT - possible_boards_counter)<25){
 		debug_reached_mem_limit = true;
-		cout<<"Reached memory limit, stop expanding this tree(/debug/ without calculating moves!!)"<<endl;
+		//cout<<"Reached memory limit, stop expanding this tree(/debug/ without calculating moves!!)"<<endl;
 		return current_score; //Score of current board
 	}
 
 	calculate_moves(current_board,color);
 
 	if((BOARD_COUNT - possible_boards_counter)<actions_size){
-		cout<<"Reached memory limit, stop expanding this tree"<<endl;
+		//cout<<"Reached memory limit, stop expanding this tree"<<endl;
 		return current_score; //Score of current board
 	}
 
@@ -249,36 +248,49 @@ int gameplay::max_value(board current_board,int current_score,int real_score,int
 
 void gameplay::connect_and_play(){
 
- int sockfd;
- sockfd = socket(AF_INET,SOCK_DGRAM,0);
- struct sockaddr_in serv,client;
- 
- serv.sin_family = AF_INET;
- serv.sin_port = htons(9876);
- serv.sin_addr.s_addr = inet_addr("127.0.0.1");
+	int sockfd;
+	sockfd = socket(AF_INET,SOCK_DGRAM,0);
+	struct sockaddr_in serv,client;
+	 
+	serv.sin_family = AF_INET;
+	serv.sin_port = htons(9876);
+	serv.sin_addr.s_addr = inet_addr("127.0.0.1");
 
- char buffer[12];
- socklen_t l = sizeof(client);
- socklen_t m = sizeof(serv);
+	char buffer[12];
+	socklen_t l = sizeof(client);
+	socklen_t m = sizeof(serv);
 
- while(true){
-	for(int i=0;i<sizeof(buffer);i++){
-		buffer[i] ='\0';
+	char name_buffer[16];
+	for(int i=0;i<sizeof(name_buffer);i++){
+			name_buffer[i] ='\0';
 	}
-		 
-	buffer[0] ='S';
-	buffer[1] ='T';
-	buffer[2] ='A';
-	buffer[3] ='V';
-	buffer[4] ='R';
-	buffer[5] ='O';
-	buffer[6] ='S';
 	
+	name_buffer[0] ='S';
+	name_buffer[1] ='T';
+	name_buffer[2] ='A';
+	name_buffer[3] ='V';
+	name_buffer[4] ='R';
+	name_buffer[5] ='O';
+	name_buffer[6] ='S';
+	name_buffer[7] ='-';
+	name_buffer[8] ='A';
+	name_buffer[9] ='N';
+	name_buffer[10] ='D';
+	name_buffer[11] ='R';
+	name_buffer[12] ='E';
+	name_buffer[13] ='A';
+	name_buffer[14] ='S';
+	name_buffer[15] ='\0';
+	
+	printf("%s\n",name_buffer);
 
-	printf("%s\n",buffer);
+	
+	sendto(sockfd,name_buffer,sizeof(name_buffer),0,(struct sockaddr *)&serv,m);
 
+	for(int i=0;i<sizeof(name_buffer);i++){
+			name_buffer[i] ='\0';
+	}
 
-	sendto(sockfd,buffer,sizeof(buffer),0,(struct sockaddr *)&serv,m);
 	while(true){
 
 		for(int i=0;i<sizeof(buffer);i++){
@@ -287,7 +299,7 @@ void gameplay::connect_and_play(){
 
 		recvfrom(sockfd,buffer,12,0,(struct sockaddr *)&client,&l);
 
-		printf("%s\n",buffer );
+		printf("Received message from server: %s\n",buffer );
 
 		if(color == team_color_type::none){
 			if(buffer[0] == 'P' && buffer[1] == 'W'){
@@ -318,16 +330,16 @@ void gameplay::connect_and_play(){
 				}
 
 
-				cout<<our_score<<"---"<<enemy_score<<endl;
+				/*cout<<our_score<<"---"<<enemy_score<<endl;
 				cout<<"================+----ROOT BOARD----============"<<endl;
 				cout<<"==============================================="<<endl;
 				chess_board.print();
-				cout<<endl;
+				cout<<endl;*/
 
 
 				if((buffer[1] == '0' && color == team_color_type::white) ||
 									(buffer[1] == '1' && color == team_color_type::black)){
-					std::cout<<"Calculating our move"<<endl;
+					std::cout<<"Calculating our move ..."<<endl;
 					// int i;
 					// cin>>i;
 
@@ -344,24 +356,25 @@ void gameplay::connect_and_play(){
 					debug_sum_move_time +=dif;
 					debug_count_move ++;
 
-					printf ("Elasped time is %.2lf seconds.\n", dif );
+					//printf ("Elasped time is %.2lf seconds.\n", dif );
 
 					sendto(sockfd,send_buffer,sizeof(send_buffer),0,(struct sockaddr *)&serv,m);
 				}else{
-					std::cout<<"Waiting for the next move"<<endl;
+					std::cout<<"Waiting for the next move..."<<endl;
 					continue;
 				}	
 
 			}else if(buffer[0] == 'G' && buffer[1] == 'B'){
 				if(color == team_color_type::white){
-					std::cout<<"Calculating white's move"<<endl;
+					//std::cout<<"Calculating white's move"<<endl;
 					for(int i=0;i<sizeof(buffer);i++){
 						buffer[i] ='\0';
 					}
-					send_buffer[0]='5';
+					/*send_buffer[0]='5';
 					send_buffer[1]='3';
 					send_buffer[2]='4';
-					send_buffer[3]='3';
+					send_buffer[3]='3';*/
+					min_max_Decision(chess_board);
 
 					sendto(sockfd,send_buffer,sizeof(send_buffer),0,(struct sockaddr *)&serv,m);
 				}else{
@@ -369,8 +382,8 @@ void gameplay::connect_and_play(){
 					continue;
 				}
 			}else if((buffer[0] == 'G' && buffer[1] == 'E')){
-
-				cout<<"\nReached mem limit: "<<debug_reached_mem_limit<<endl;
+				cout<<endl;
+				//cout<<"Reached mem limit: "<<debug_reached_mem_limit<<endl;
 				cout<<"Max move time : "<<debug_max_move_time<<endl;
 				cout<<"Average move time : "<<debug_sum_move_time/debug_count_move<<endl;
 				cout<<"total moves : "<<debug_count_move<<endl;
@@ -403,8 +416,8 @@ void gameplay::connect_and_play(){
 
 		}
 	}	
- }
 }
+
 
 
 

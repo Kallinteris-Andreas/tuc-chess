@@ -17,13 +17,9 @@
 
 #define MAX_INT 2147483
 #define BOARD_COUNT 10000000
-#define MAX_DEPTH 8
+#define MAX_DEPTH 10
 
 #define A_B_PRUNNING true
-
-//Good variable pairs are:
-//MAX_DEPTH 	| 4     | 6
-//BOARD_COUNT 	|100000 |1000000
 
 class gameplay{
 	private:
